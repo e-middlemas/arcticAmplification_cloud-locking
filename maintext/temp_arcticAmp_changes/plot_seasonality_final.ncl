@@ -10,14 +10,14 @@
 ; After you've located where those new GWTS netcdf files are, edit the line below,
 ; make sure the figure is titled something you can easily identify, and run!
 ;=================================================================================
+;---------------------------------------------------
+; User-defined section
 
 ; Replace $YOURPATHTO_GWTSFILES with the your path to the GWTS files.
 gwtsfnames = systemfunc("ls $YOURPATHTO_GWTSFILES/*GWTS*") 
 
-;; reorder files because configuration names are alphabetically out of order
+; reorder files because configuration names are alphabetically out of order
 gwtsfnames = gwtsfnames((/2,0,1/)) ; clouds active, global clock, arctic clock
-nofs = dimsizes(gwtsfnames)
-f = addfiles(gwtsfnames,"r")
 
 ; indicate the output plot type ("eps", "pdf", "x11", "png", etc)
 plottype = "eps"
@@ -26,9 +26,18 @@ plottype = "eps"
 ; ("std") or the max/min of the values across years ("minmax")?
 stdminmax = "std"
 
+;---------------------------------------------------
+; Extracting relevant data
+
+nofs = dimsizes(gwtsfnames)
+f = addfiles(gwtsfnames,"r")
+
 ; Ensure that the time extracted from GWTS is for corresponding to the last 150 years
 ;  of the 2xCO2 simulation.
 dtime = 150*12
+
+; Here, I have to be careful about the indices because two of my 2xCO2 simulations 
+; start in March instead of January.
 indst = new(nofs,integer)
 do n=0,nofs-1
         if n.eq.0
@@ -59,6 +68,9 @@ do n=0,nofs-1
         deltats(n,0:dtime-1,:,:) = f[n]->GWTS(indst(n):indst(n)+dtime-1,:,:)
 end do
 ;
+;---------------------------------------------------
+; Calculating warming & arctic amplification
+
 ; calculate warming over northern hemisphere
 clat = cos(lat({0::})*rad)
 gmw = wgt_areaave_Wrap(deltats(:,:,{0::},:),clat,1.0,1)
@@ -109,8 +121,8 @@ end if
 ;-----------------------------------------------------------------
 print("plotting...")
 
-; Set everything up:
 ;-----------------------------------------------------------------
+; Set everything up:
 wks = gsn_open_wks(plottype,".$PATHTOFIGURES/arcticWarming+Amplification_seasonality_"+stdminmax)
 cols = (/"black","darkorange2","blue"/)
 runnames = (/"Control","Global cloud-locked","Arctic-only cloud-locked"/)
