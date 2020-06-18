@@ -1,7 +1,11 @@
 ;========================================================================
-; This is a script that simply calls the function written in calc_GWTS.ncl to output a netcdf file containing the temperature response to some forcing -- in our case, a CO2 doubling. 
+; This is a script that simply calls the function written in calc_GWTS.ncl 
+; to output a netcdf file containing the temperature response to some 
+; forcing -- in our case, a CO2 doubling. 
 ;
-; Replace the filenames with those corresponding to the CESM postprocessed timeseries output file for surface temperature (TS) for preindustrial control and forced simulations.
+; Replace the filenames with those corresponding to the CESM postprocessed
+; timeseries output file for surface temperature (TS) for preindustrial 
+; control and forced simulations.
 ;
 
 load "./calc_GWTS.ncl"

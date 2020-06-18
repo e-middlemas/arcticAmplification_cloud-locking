@@ -3,20 +3,34 @@ procedure calc_gwts(diro,expname,fname2xCO2,fnamepictrl,filenameo)
 ;-------- DESCRIPTION ---------------------------------------
 ; This function calculates the response of temperature to a doubling of CO2.
 ;
-; The response is calculated by subtracting the monthly climatological surface temperature from a simulation with preindustrial control forcing from the first 150 years of a simulation with doubled CO2. 
+; The response is calculated by subtracting the monthly climatological surface
+; temperature from a simulation with preindustrial control forcing from the 
+; first 150 years of a simulation with doubled CO2. 
 ;
-; It's intended purpose was for comparing the response of temperature across a suite of simulations: one simulation with cloud feedbacks active, another with global cloud feedbacks locked, and a last with only Arctic cloud feedbacks locked. Thus, there are many lines hardcoded to accommodate these simulations.
+; It's intended purpose was for comparing the response of temperature across a
+; suite of simulations: one simulation with cloud feedbacks active, another
+; with global cloud feedbacks locked, and a last with only Arctic cloud 
+; feedbacks locked. Thus, there are many lines hardcoded to accommodate these
+; simulations.
 ;
 ;-------- USAGE --------------------------------------------
 ; Inputs (all strings): 
-; - diro - the directory where outputted temperature response netcdf files will go
-; - expname - a string with no spaces that describes the experimental configuration (for our studies, it was something like "control", "globalcloudlocked", and "arcticcloudlocked")
+; - diro - the directory for outputted temperature response netcdf files
+; - expname - a string with no spaces that describes the experimental 
+;	configuration (for our studies, it was something like "control", 
+;	"globalcloudlocked", and "arcticcloudlocked")
 ; - fname2xCO2 - the casename for the experiment with doubled CO2
-; - fnamepictrl - the casename for the experiment with preindustrial control forcing
-; - filenameo - user-defined filename for output netcdf file containing temperature response
+; - fnamepictrl - the casename for the experiment with preindustrial control 
+;	forcing
+; - filenameo - user-defined filename for output netcdf file containing 
+;	temperature response
 ;
 ; Outputs: 
-; Nothing is returned, but creates a new netcdf file in the desired output directory. This new file contains a 3D variable called "GWTS" (global warming surface temperature), where each timepoint is a map of the 2xCO2 surface temperature with the climatological temperature of the preindustrial control simulation for the corresponding month removed. 
+; Nothing is returned, but creates a new netcdf file in the desired output 
+; directory. This new file contains a 3D variable called "GWTS" (global warming 
+; surface temperature), where each timepoint is a map of the 2xCO2 surface 
+; temperature with the climatological temperature of the preindustrial control 
+; simulation for the corresponding month removed. 
 ;===========================================================
 
 begin
@@ -69,7 +83,9 @@ pictrlts = f->TS(indend-noyrs*12+1:indend,:,:)
 ;----------------------------------------------------------------------
 ; Calculate climatology in preindustrial control simulation & subtract pictrl
 ;----------------------------------------------------------------------
-; There are two methods: one uses conform_dims. The other, "brute force" method. I think I avoid using conform_dims because two of our 2xCO2 simulationsstart in March instead of January... and it was hard to keep track of the indices.
+; There are two methods: one uses conform_dims. The other, "brute force" method. 
+; I think I avoid using conform_dims because two of our 2xCO2 simulationsstart in 
+; March instead of January... and it was hard to keep track of the indices.
 
 ; conform_dims method
 ;---------------------
