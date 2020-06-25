@@ -19,8 +19,7 @@
 ; 	timeseries files. Timeseries files should all be in
 ;	one location and should include PSL (sea level 
 ;	pressure), TS (surface temperature), ICEFRAC (sea 
-;	ice fraction), and optionally, CLDTOT (total cloud
-;	fraction). 
+;	ice fraction). 
 ; - "forcing": a string indicating which forced experiments
 ;	should be analyzed. The options include "1x" or "2x"
 ;	for 1xCO2 and 2xCO2, respectively.
@@ -72,7 +71,7 @@ begin
 	
 end
 
-function extract_spatial_data(dir:string,forcing:string,cldopt:logical)
+function extract_spatial_data(dir:string,forcing:string)
 ;-------------------------------------------------------
 ; Extract data from runs & compute relevant averages
 ;-------------------------------------------------------
@@ -103,8 +102,7 @@ function extract_spatial_data(dir:string,forcing:string,cldopt:logical)
 ;
 ; OUTPUTS:
 ; - The returned value is a matrix containing seasonal
-;	average maps for TS, PSL, ICEFRAC, and optionally,
-;	CLDTOT. 
+;	average maps for TS, PSL, & ICEFRAC. 
 ; Resulting output variable will be of size (/3, 3, 3, size(lat), size(lon)/)*
 ; 4 corresponds to TS, PSL, ICEFRAC*
 ; the first 3 corresponds to the experimental configuation: clouds active, 
@@ -112,9 +110,8 @@ function extract_spatial_data(dir:string,forcing:string,cldopt:logical)
 ; The second 3 corresponds to the climatology: annual mean, winter DJF, summer JJA
 ;
 ; ! NOTES: 
-; * If CLDTOT is output as well, the size will be (/4, 3, 3, size(lat), size(lon)/)
-; - If a different set of experiments is desired, the 
-;	experiment names just below must be changed.
+; - If a different set of experiments is desired, the experiment names just 
+;	below must be changed.
 begin
 
 	if forcing.eq."1x"
@@ -191,43 +188,12 @@ begin
 	iceout!1 = "ann,djf,jja"
 	print("ICEFRAC done!")
 	
-	;; TOTAL CLOUD FRACTION
-	if cldopt==True
-		print("Extracting & computing averages for CLDTOT...")
-		cldout = new((/3,3,dimsizes(lat),dimsizes(lon)/),float) ; maps to be plotted
-		do e=0,dimsizes(exps)-1
-			f = addfile(systemfunc("ls "+dir+exps(e)+".cam.h0.CLDTOT.*.nc"),"r")
-			time_cal = cd_calendar(f->time,0)
-			;  look for time index where month = Jan and year is 100 years after start of run
-			startind = ind(time_cal(:,0).eq.(time_cal(0,0)+100) .and. time_cal(:,1).eq.2)
-			;  look for time index where month = Dec and year is 150 years after start of run
-			endind = ind(time_cal(:,0).eq.(time_cal(0,0)+150) .and. time_cal(:,1).eq.1)
-			; extract only years 100-150
-			var = f->CLDTOT(startind:endind,:,:)
-			; use function above to return annual, winter, and summer climatology maps
-			cldout(e,:,:,:) = compute_avgs(var)
-			delete(time_cal)
-		end do
-		; Define dimensions of output variable
-		cldout!0 = "ctrl,globalclock,arcticclock"
-		cldout!1 = "ann,djf,jja"
-		print("CLDTOT done!")
-		
-		; Resulting output variable will be of size (/4, 3, 3, size(lat), size(lon)/)
-		; 4 corresponds to TS, PSL, ICEFRAC, and CLDTOT
-		; the first 3 corresponds to the experimental configuation: clouds active, 
-		;	global cloud-locking, and Arctic cloud-locking
-		; The second 3 corresponds to the climatology: annual mean, winter DJF, summer JJA
-		return((/tsout,psout,iceout,cldout/))
-	else
-	
-		; Resulting output variable will be of size (/3, 3, 3, size(lat), size(lon)/)
-		; 4 corresponds to TS, PSL, ICEFRAC
-		; the first 3 corresponds to the experimental configuation: clouds active, 
-		;	global cloud-locking, and Arctic cloud-locking
-		; The second 3 corresponds to the climatology: annual mean, winter DJF, summer JJA
-		return((/tsout,psout,iceout/))	
-	end if
+	; Resulting output variable will be of size (/3, 3, 3, size(lat), size(lon)/)
+	; 4 corresponds to TS, PSL, ICEFRAC
+	; the first 3 corresponds to the experimental configuation: clouds active, 
+	;	global cloud-locking, and Arctic cloud-locking
+	; The second 3 corresponds to the climatology: annual mean, winter DJF, summer JJA
+	return((/tsout,psout,iceout/))	
 
 end
 
