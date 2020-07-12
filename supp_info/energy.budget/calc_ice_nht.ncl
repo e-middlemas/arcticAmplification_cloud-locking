@@ -1,25 +1,24 @@
 procedure calc_ice_heat(inpath,expname,outpath,starttime)
-
-begin
-
-load "~/postprocscripts/extract_from_archive/popRemap.ncl"
-
-
-inpath = "/glade/work/eleanorm/cldlck_data/cldlck_polar/orig/"
-expname = "B1850C5CN.clock.9p.global"
-outpath = "/glade/work/eleanorm/cldlck_data/cldlck_polar/"
-starttime = 240.1667 
-
-;-------------------------------------------------------------
+;=============================================================
 ; CALCULATING HEAT TRANSPORT BY ICE
+;
+; This procedure was written by Eleanor Middlemas (2019) but based 
+; entirely from calculations written by Jen Kay at CU Boulder.
+;
 ; 1. Load in "dvidtd", or ice volume convergence tendency
 ; 2. Average over last 50 years of 2xCO2 simulation or years
 ;       100 - 150 after branch year
-; 3. Convert to atmospheric grid using PopLatLon
+; 3. Convert to atmospheric grid using PopLatLon (look on NCL website
+;	for more information. Requires the use of script popRemap.ncl)
 ; 4. Convert tendency to volume flux and then to energy flux
 ; 5. Convert also between transport and flux (PW --> W m-2)
 ; 6. Save to file
-;-------------------------------------------------------------
+;=============================================================
+begin
+
+; must also have popRemap.ncl saved in local directory. User should
+; search for it on the NCL website.
+load "./popRemap.ncl"
 
 ; need dvidtd from CICE
 fice = addfile(systemfunc("ls "+inpath+expname+".cice.h.dvidtd*"),"r")

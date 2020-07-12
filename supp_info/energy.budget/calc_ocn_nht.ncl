@@ -1,15 +1,17 @@
 procedure calc_ocn_heat(inpath,expname,outpath,starttime)
-
-;-------------------------------------------------------------
+;=============================================================
 ; CALCULATING OCEANIC HEAT TRANSPORT
+;
+; This procedure was written by Eleanor Middlemas (2019) but based 
+; entirely from calculations written by Jen Kay at CU Boulder.
+;
 ; 1. Load in global total, northward heat transport N_HEAT 
 ; 2. Average over last 50 years of 2xCO2 simulation or years
 ; 	100 - 150 after branch year
 ; 3. Convert to atmospheric grid using linear interpolation
 ; 4. Convert also between transport and flux (PW --> W m-2)
 ; 5. Save to file
-;-------------------------------------------------------------
-
+;=============================================================
 begin
 
 ; need N_HEAT from POP
@@ -32,7 +34,7 @@ nheat:=dim_avg_n_Wrap(nheat,0)
 ;
 ;-------------------------------------------------------------
 ; Convert to atm grid
-;-------------------------------------------------------------
+
 lat_aux_grid = focn->lat_aux_grid
 ;
 ; extract atmospheric coordinates

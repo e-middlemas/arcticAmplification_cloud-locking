@@ -1,7 +1,9 @@
 procedure calc_atm_heat(inpath,expname,outpath,starttime)
-
-;----------------------------------------------------------------------------
+;============================================================================
 ; CALCULATING ATMOSPHERIC HEAT TRANSPORT
+;
+; This procedure was written by Eleanor Middlemas (2019) but based 
+; entirely from calculations written by Jen Kay at CU Boulder.
 ;
 ; 1. Calculate net energy imbalance at the top-of-atmosphere (FSNT-FLNT)
 ; 2. Calculate net energy balance at the surface, but also correct for the 
@@ -14,8 +16,7 @@ procedure calc_atm_heat(inpath,expname,outpath,starttime)
 ;	liquid+ice+snow (total latent energy tarnsport).
 ; 6. Find dry static energy transport.
 ; 7. Save all terms and their associated fluxes to file.
-;----------------------------------------------------------------------------
-
+;============================================================================
 begin
 
 ; deal with time & lat/lon coordinates to be used in the rest of code
@@ -23,6 +24,8 @@ fatm = addfile(systemfunc("ls "+inpath+expname+".cam.h0.FSNT.*"),"r")
 timecal = cd_calendar(fatm->time,0)
 time = timecal(:,0)+mod(timecal(:,1)+10,12)/12.
 
+; Look for indices that correspond to the last 50-year period of the 2xCO2
+;	simulation
 startind = ind(time.eq.starttime) ; will be user-defined
 endind = ind(time.eq.(starttime+50)) ; 50-year average
 if ismissing(endind).eq.True ; for cloud-locked arctic-only pictrl simulation

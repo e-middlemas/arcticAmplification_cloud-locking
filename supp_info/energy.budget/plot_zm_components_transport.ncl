@@ -1,11 +1,23 @@
-;------------------------------------------------------------------
+;============================================================================
+; Plot changes in northward energy transport with a variety of
+; cloud-locking configurations.
+;
+; The resulting plots were not included in Middlemas et al. (in 
+; review, GRL), but the values outputted from this script, i.e.,
+; northward heat transport values for each configuration at 70N
+; were included in the supplemental information.
 ; 
-;------------------------------------------------------------------
-; plot total, atm, ocean, ice for each simulation:
-;    - left panel pictrl balance
-;    - right panel 2xCO2 minus pictrl
-;    - 3 rows: one for each experiment
-;    - total - solid, atm - dashed, ocean - dotted, ice - dot/dash
+; To run this script, the user should first execute 
+; 	"run_z.mean_energy.budget.ncl" found in the same folder 
+;	in order to calculate the zonal mean northward energy
+;	transport.
+;
+; The user should indicate below:
+; 1) The plot output
+; 2) path to energy budget data &, if plot is saved, the path to 
+; 	where that figure should be saved
+; 3) Experiment names if using something other than cloud-locking
+;=============================================================================
 ;plottype = "x11"
 plottype = "pdf"
 northbound = 40 ; minimum latitude drawn
@@ -18,6 +30,10 @@ expnames = (/"b.e11.B1850C5CN.f09_g16.005","b.e11.B1850C5CN.f09_g16.005_2xCO2", 
 "B1850C5CN.clock.9p.70-90N","B1850C5CN.clock.9p.70-90N.2xCO2"/)
 noexps = dimsizes(expnames)
 
+;----------------------------------------------------------------------------
+; Define component names for legend and for keeping track of variable
+; dimensions
+;----------------------------------------------------------------------------
 compname = (/"cam","pop","cice"/)
 varnames = (/"tot","atm","ocnnht","icenht"/)
 varlongname = (/"Total","Atmospheric","Oceanic","By ice"/)
@@ -44,6 +60,9 @@ inds2keep:= array_append_record(tmp,inds2keep(4::),0)
 lat!0 = "lat"
 lat&lat = lat
 
+;----------------------------------------------------------------------------
+; Extract northward energy transport for each component & save to variable
+;----------------------------------------------------------------------------
 ; Need two sets of variables: one for pictrl v. 2xCO2 in clouds active
 ;	* size = (/3,2,4,lat/)
 ; And one for the responses (2xCO2 - pictrl):
@@ -63,11 +82,15 @@ do e=0,dimsizes(expnames)-1
 	end do
 end do
 
-meta = f->$varnames(v-1)$
-zm:=reshape(zm,(/3,2,dimsizes(varnames),dlat/))
-zmresp = zm(:,1,:,:)-zm(:,0,:,:)
+; Reshape so that configurations and forcings are separated
 expnames:=reshape(expnames,(/3,2/))
+zm:=reshape(zm,(/3,2,dimsizes(varnames),dlat/))
 
+; Calculate the response of energy transport to a CO2 doubling
+zmresp = zm(:,1,:,:)-zm(:,0,:,:)
+
+; Assign metadata
+meta = f->$varnames(v-1)$
 copy_VarMeta(meta,zm(0,0,0,:))
 copy_VarMeta(meta,zmresp(0,0,:))
 
@@ -133,7 +156,7 @@ lineind =lat(ind(latorig.eq.70))
 dum = new(4,graphic)
 ;---------------------------------------------------------------
 ; Panel plots
-;
+;---------------------------------------------------------------
 plotforcing = new((/2,4/),graphic) ; left panels
 plotresp = new((/3,4/),graphic) ; right panels
 do v=0,dimsizes(varnames)-1 ; variables plotted

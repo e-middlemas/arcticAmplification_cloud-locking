@@ -1,9 +1,52 @@
+;===============================================================================
+; Run code to calculate northward energy transport
+; Written by Eleanor Middlemas, 2019
+; Credit to Professor Jen Kay at CU Boulder for
+;	coding the calculations for actually calculating northward heat
+;	transport.
+;
+; This script runs calculations northward energy transport in the atmosphere, ice,
+; 	& ocean components averaged over years 100-150 and saves to netcdf
+;	files. The format of each is simply a vector of zonal-mean energy 
+;	transport values corresponding to latitude. 
+;
+; The user must indicate where the original output CESM data lives, as well as
+; 	the path to output northward heat transport estimates. 
+;
+; The variables needed for atmospheric component energy budget analysis include:
+;	- FSNT
+;	- FLNT
+;	- FSNS
+;	- FLNS
+;	- SHFLX
+;	- LHFLX
+; 	- PRECSC
+;	- PRECSL
+;	- QFLX
+;	- PRECC
+; 	- PRECL
+;
+; The variables needed for ocean component energy budget analysis include:
+;	- N_HEAT (from POP)
+;	- FSNS (for interpolation only, from CAM) 
+;
+; The variables needed for ice component energy budget analysis include:
+;	- dvidtd
+;	- FSNS (for interpolation only, from CAM) 
+;	
+; The current code is written to analyze a suite of cloud-locking experiments,
+; 	so the experiment names below ("expnames") reflect the names of those
+;	experiments. Also, the loop to determine the start date is written
+;	especially for those experiments. Specifically, that on lines 60-62, & 
+;	lines 66-67. 
+;===============================================================================
+
 load "calc_atm_nht.ncl"
 load "calc_ice_nht.ncl"
 load "calc_ocn_nht.ncl"
 
-sourcedatapath = "/glade/work/eleanorm/cldlck_data/cldlck_polar/orig/"
-outputpath = "/glade/work/eleanorm/cldlck_data/cldlck_polar/"
+sourcedatapath = "./orig/"
+outputpath = "/"
 
 expnames = (/"b.e11.B1850C5CN.f09_g16.005","b.e11.B1850C5CN.f09_g16.005_2xCO2", \+
 "B1850C5CN.clock.9p.global","B1850C5CN.clock.9p.2xCO2", \+
