@@ -19,8 +19,13 @@ gwtsfnames = systemfunc("ls $YOURPATHTO_GWTSFILES/*GWTS*")
 ; reorder files because configuration names are alphabetically out of order
 gwtsfnames = gwtsfnames((/2,0,1/)) ; clouds active, global clock, arctic clock
 
+; Decide whether to normalize by global mean warming or northern hemisphere
+; warming (paper normalizes by the latter)
+; * Options are "gm" and "nhw"
+normalize = "nhw"
+
 ; indicate the output plot type ("eps", "pdf", "x11", "png", etc)
-plottype = "eps"
+plottype = "x11"
 
 ;---------------------------------------------------
 ; Extracting relevant data
@@ -35,35 +40,44 @@ lat!0 = "lat"
 lat&lat = lat
 rad = 4.0*atan(1.0)/180.
 ;
-; Average over last 50 years of time dimension
+; Average over last 50 years of time dimension to produce global warming
+; maps.
 ; This works because when I calculated GWTS I specifically chose years
 ; 100 through 150
 d = dimsizes(f[0]->GWTS)
-deltats = new((/nofs,d(1),d(2)/),float)
+gwts = new((/nofs,d(1),d(2)/),float)
 do n=0,nofs-1
-        deltats(n,:,:) = dim_avg_n_Wrap(f[n]->GWTS(d(0)-50*12:d(0)-1,:,:),0)
+        gwts(n,:,:) = dim_avg_n_Wrap(f[n]->GWTS(d(0)-50*12:d(0)-1,:,:),0)
 end do
 
 ;---------------------------------------------------
 ; Calculating warming & arctic amplification
 
 ; calculate warming over northern hemisphere:
-clat = cos(lat({0::})*rad)
-gmw = wgt_areaave_Wrap(deltats(:,{0::},:),clat,1.0,1)
-;
+clatnh = cos(lat({0::})*rad)
+gnh = wgt_areaave_Wrap(gwts(:,{0::},:),clatnh,1.0,1)
+
+; calculate global mean warming
+clat = cos(lat*rad)
+gmw = wgt_areaave_Wrap(gwts,clat,1.0,1)
+
 ; zonal mean global warming response:
-deltats:=dim_avg_n_Wrap(deltats,2) ; average over all longitudes for zonal mean
-;
+gwts:=dim_avg_n_Wrap(gwts,2) ; average over all longitudes for zonal mean
+
 ; calculate global warming amplification at each latitude
-gwts = deltats/conform_dims(dimsizes(deltats),gmw,0) ; divide by northern hemisphere warming
-gwts!1 = "lat"
-gwts&lat = lat
+if normalize.eq."gm"
+        gwts_norm = gwts/conform_dims(dimsizes(gwts),gmw,0)
+else
+        gwts_norm = gwts/conform_dims(dimsizes(gwts),gnh,0)
+end if
+gwts_norm!1 = "lat"
+gwts_norm&lat = lat
 
 ; find average over arctic for enumerating arctic amplification
 clatarctic = cos(rad*lat({70:90}))
 aa = new(3,float)
 do n=0,2
-	aa(n) = dim_avg_wgt_Wrap(gwts(n,{70:90}),clatarctic,0)
+	aa(n) = dim_avg_wgt_Wrap(gwts_norm(n,{70:90}),clatarctic,0)
 end do
 
 ;---------------------------------------------------
@@ -150,7 +164,7 @@ do r=0,nofs-1 ; step through experimental configurations
 	res@trYMaxF = 14
 	res@tiYAxisString = "Surface Warming (K)"
 	res@xyLineColor = cols(r)
-	plotts(r) = gsn_csm_xy(wks,lat,deltats(r,:),res)
+	plotts(r) = gsn_csm_xy(wks,lat,gwts(r,:),res)
 	
 	; Arctic amplification plot (below)
 	res2@tmXBValues = lat(inds2keep)
@@ -160,7 +174,7 @@ do r=0,nofs-1 ; step through experimental configurations
 	res2@trYMinF = 0
 	res2@trYMaxF = 6
 	res2@xyLineColor = cols(r)
-	plotAA(r) = gsn_csm_xy(wks,lat(dlat/2-1:dlat-1),gwts(r,dlat/2-1:dlat-1),res2)
+	plotAA(r) = gsn_csm_xy(wks,lat(dlat/2-1:dlat-1),gwts_norm(r,dlat/2-1:dlat-1),res2)
 
 	if r.gt.0
 		overlay(plotts(0),plotts(r))
